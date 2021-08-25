@@ -42,6 +42,13 @@ spec:
       args:
         - |-
           echo "MAVEN_CLEAR_REPO=$(params.MAVEN_CLEAR_REPO)" > env-file
+          # https://docs.openshift.com/online/pro/using_images/s2i_images/java.html
+          # https://robertopozzi.medium.com/implement-your-ci-cd-process-with-red-hat-openshift-pipelines-3936cbea7bf4
+          echo "S2I_TARGET_DEPLOYMENTS_DIR=/deployments" >> env-file
+          echo "S2I_SOURCE_DEPLOYMENTS_FILTER=*.war" >> env-file
+          echo "S2I_SOURCE_CONFIGURATION_DIR=src/main/liberty" >> env-file
+          echo "S2I_TARGET_CONFIGURATION_DIR=/deployments" >> env-file
+          
 
           [[ '$(params.MAVEN_ARGS_APPEND)' != "" ]] &&
             echo "MAVEN_ARGS_APPEND=$(params.MAVEN_ARGS_APPEND)" >> env-file
@@ -77,19 +84,24 @@ spec:
         - name: envparams
           mountPath: /env-params
       workingDir: /workspace/source
+    - name: peek-at-assemble-script
+      command:
+        - sh
+        - -c
+        - cat /usr/local/s2i/assemble
+      image: registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift
+      volumeMounts:
+        - name: gen-source
+          mountPath: /gen-source
+        - name: envparams
+          mountPath: /env-params
+      workingDir: /workspace/source
     - name: build
       command:
-        - buildah
-        - bud
-        - '--tls-verify=$(params.TLSVERIFY)'
-        - '--storage-driver=$(params.STORAGE_DRIVER)'
-        - '--layers'
-        - '-f'
-        - /gen-source/Dockerfile.gen
-        - '-t'
-        - $(resources.outputs.intermediate-image.url)
-        - .
-      image: registry.redhat.io/rhel8/buildah@sha256:6a68ece207bc5fd8db2dd5cc2d0b53136236fb5178eb5b71eebe5d07a3c33d13
+        - sh
+        - -c 
+        - "buildah bud '--tls-verify=$(params.TLSVERIFY)' '--storage-driver=$(params.STORAGE_DRIVER)' '--layers' '-f' /gen-source/Dockerfile.gen '-t' $(resources.outputs.intermediate-image.url) .; ls -lrt /deployments"
+      image: registry.redhat.io/rhel8/buildah:8.4-13
       resources: {}
       volumeMounts:
         - name: pipeline-cache
@@ -102,11 +114,23 @@ spec:
         - buildah
         - images
         - '--storage-driver=$(params.STORAGE_DRIVER)'
-      image: registry.redhat.io/rhel8/buildah
+      image: registry.redhat.io/rhel8/buildah:8.4-13
       resources: {}
       volumeMounts:
         - name: pipeline-cache
           mountPath: /var/lib/containers
+    - name: list-image-contents
+      command:
+        - sh
+        - -c
+        - cat /gen-source/Dockerfile.gen && mnt=$(buildah mount '--storage-driver=$(params.STORAGE_DRIVER)' `buildah from localhost/intermediate '--storage-driver=$(params.STORAGE_DRIVER)'`); find $mnt
+      image: registry.redhat.io/rhel8/buildah:8.4-13
+      resources: {}
+      volumeMounts:
+        - name: pipeline-cache
+          mountPath: /var/lib/containers
+        - name: gen-source
+          mountPath: /gen-source
   volumes:
     - emptyDir: {}
       name: envparams

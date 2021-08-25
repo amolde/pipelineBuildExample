@@ -3,6 +3,7 @@ kind: PipelineRun
 metadata:
   generateName: liberty-rest-app-run-pr-
 spec:
+  serviceAccountName: pipeline
   pipelineRef:
     name: liberty-rest-app
   resources:

@@ -13,7 +13,7 @@ spec:
         - buildah
         - images
         - '--storage-driver=$(params.STORAGE_DRIVER)'
-      image: registry.redhat.io/rhel8/buildah
+      image: registry.redhat.io/rhel8/buildah:8.4-13
       resources: {}
       volumeMounts:
         - name: pipeline-cache
@@ -25,7 +25,7 @@ spec:
         - '-a'
         - '-f'
         - '--storage-driver=$(params.STORAGE_DRIVER)'
-      image: registry.redhat.io/rhel8/buildah
+      image: registry.redhat.io/rhel8/buildah:8.4-13
       resources: {}
       volumeMounts:
         - name: pipeline-cache

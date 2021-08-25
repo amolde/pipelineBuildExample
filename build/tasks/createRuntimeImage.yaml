@@ -45,8 +45,8 @@ spec:
         - |-
           echo "FROM $(resources.inputs.intermediate-image.url) as intermediate-image" > ext-dockerfile.gen
           echo "FROM docker.io/openliberty/open-liberty as runtime-image" >> ext-dockerfile.gen
-          echo "COPY --from=intermediate-image /tmp/src/target/liberty-rest-app.war /config/apps/liberty-rest-app.war" >> ext-dockerfile.gen
-          echo "COPY --from=intermediate-image /tmp/src/src/main/liberty/config/server.xml /config/server.xml" >> ext-dockerfile.gen
+          echo "COPY --from=intermediate-image /deployments/liberty-rest-app.war /config/apps/liberty-rest-app.war" >> ext-dockerfile.gen
+          echo "COPY --from=intermediate-image /deployments/config /config/" >> ext-dockerfile.gen
           echo "LABEL github.repository.url=\"$(params.gitrepository_url)\" \\" >> ext-dockerfile.gen
           echo "github.repository.fullname=\"$(params.gitrepository_fullname)\" \\" >> ext-dockerfile.gen
           echo "github.commit.ref=\"$(params.commit_ref)\" \\" >> ext-dockerfile.gen
@@ -77,7 +77,7 @@ spec:
         - '-t'
         - $(resources.outputs.runtime-image.url)
         - .
-      image: registry.redhat.io/rhel8/buildah
+      image: registry.redhat.io/rhel8/buildah:8.4-13
       resources: {}
       volumeMounts:
         - name: pipeline-cache
@@ -90,7 +90,7 @@ spec:
         - buildah
         - images
         - '--storage-driver=$(params.STORAGE_DRIVER)'
-      image: registry.redhat.io/rhel8/buildah
+      image: registry.redhat.io/rhel8/buildah:8.4-13
       resources: {}
       volumeMounts:
         - name: pipeline-cache
@@ -103,7 +103,7 @@ spec:
         - '--tls-verify=$(params.TLSVERIFY)'
         - $(resources.outputs.runtime-image.url)
         - 'docker://$(resources.outputs.runtime-image.url)'
-      image: registry.redhat.io/rhel8/buildah
+      image: registry.redhat.io/rhel8/buildah:8.4-13
       resources: {}
       volumeMounts:
         - name: pipeline-cache

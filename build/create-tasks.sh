@@ -10,3 +10,5 @@ oc create --save-config=true -f tasks/createRuntimeImage.yaml
 oc create --save-config=true -f tasks/ocProcessDeploymentTemplate.yaml 
 oc create --save-config=true -f tasks/pushImageToQuay.yaml
 oc create --save-config=true -f pipelines/pipeline.yaml
+oc delete pipelineRun --all
+oc secrets link pipeline dockerhubcred --for=pull

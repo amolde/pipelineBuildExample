@@ -10,5 +10,5 @@ oc apply -f tasks/createRuntimeImage.yaml
 oc apply -f tasks/ocProcessDeploymentTemplate.yaml 
 oc apply -f tasks/pushImageToQuay.yaml
 oc apply -f pipelines/pipeline.yaml
-oc secrets link pipeline dockerhubcred --for=pull
+oc secrets link pipeline dockerhubcred #--for=pull
 oc delete pipelineRun --all

@@ -100,7 +100,7 @@ spec:
       command:
         - sh
         - -c 
-        - "buildah bud '--tls-verify=$(params.TLSVERIFY)' '--storage-driver=$(params.STORAGE_DRIVER)' '--layers' '-f' /gen-source/Dockerfile.gen '-t' $(resources.outputs.intermediate-image.url) .; ls -lrt /deployments"
+        - "buildah bud '--tls-verify=$(params.TLSVERIFY)' '--storage-driver=$(params.STORAGE_DRIVER)' '--layers' '-f' /gen-source/Dockerfile.gen '-t' $(resources.outputs.intermediate-image.url) .; cat /gen-source/Dockerfile.gen"
       image: registry.redhat.io/rhel8/buildah:8.4-13
       resources: {}
       volumeMounts:
